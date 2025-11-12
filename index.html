@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YUM</title>
+  <style>
+    :root{
+      --bg:#000; --fg:#f5f5f5; --muted:#bcbcbc; --line:#222;
+      --radius:14px; --maxw:780px;
+      --btnbg:#111; --btnfg:#fff; --btnbd:#444;
+      --focus:#38bdf8;
+    }
+    /* 전체 레이아웃 */
+    html,body{height:100%; margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:system-ui, "Noto Sans KR", sans-serif;}
+    .wrap{
+      min-height:100%;
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .card{
+      width:100%; max-width:var(--maxw);
+      display:flex; flex-direction:column; align-items:center; gap:16px;
+      text-align:center;
+    }
+    /* 미디어 */
+    img, video{display:block; width:100%; height:auto; border-radius:var(--radius); background:#000;}
+    .media-frame{width:100%; background:#000; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.35);}
+    .hint{color:var(--muted); font-size:.95rem;}
+
+    /* 폼 */
+    .row{width:100%; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+    input[type="text"]{
+      flex:1 1 280px; max-width:520px;
+      padding:12px 14px; font-size:16px; color:#fff; background:#0b0b0b;
+      border:1px solid var(--btnbd); border-radius:10px; outline:none;
+    }
+    input[type="text"]::placeholder{color:#777;}
+    input[type="text"]:focus{border-color:var(--focus); box-shadow:0 0 0 3px rgba(56,189,248,.25);}
+    .btn{
+      padding:12px 18px; font-weight:800; font-size:16px;
+      color:var(--btnfg); background:var(--btnbg);
+      border:1px solid var(--btnbd); border-radius:10px; cursor:pointer;
+    }
+    .btn:active{transform:translateY(1px);}
+    .error{min-height:1.2em; color:#ff6b6b; font-weight:700;}
+
+    /* 반응형 살짝 */
+    @media (max-width:420px){
+      .card{gap:14px}
+      .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" id="app">
+      <!-- 첫 페이지 -->
+      <div class="media-frame">
+        <img src="static/yum.jpg" alt="yum">
+      </div>
+
+      <div class="row" id="formRow">
+        <input id="answer" type="text" placeholder="혹시 쥐?" autocomplete="off" />
+        <button class="btn" id="submitBtn" type="button">입력</button>
+      </div>
+      <div class="error" id="err"></div>
+
+      <p class="hint">정답을 입력하면 다음 화면으로 이동합니다.</p>
+    </main>
+  </div>
+
+  <script>
+    const app = document.getElementById('app');
+    const input = document.getElementById('answer');
+    const btn = document.getElementById('submitBtn');
+    const err = document.getElementById('err');
+
+    // 정답 판정: 앞뒤 공백 제거 + 내부 연속 공백 1칸으로 정규화 후 일치
+    function normalize(s){ return (s||"").trim().replace(/\s+/g, " "); }
+    function isCorrect(s){ return normalize(s) === "혹시 쥐?"; }
+
+    function goPage2(){
+      app.innerHTML = `
+        <div class="media-frame">
+          <video id="vid" playsinline muted autoplay controls>
+            <source src="static/yumchange.mp4" type="video/mp4" />
+            동영상을 재생할 수 없습니다.
+          </video>
+        </div>
+        <p class="hint">영상이 재생되지 않으면 네트워크 상태를 확인해 주세요.</p>
+      `;
+      const v = document.getElementById('vid');
+      // iOS 자동재생 보조
+      v.muted = true; v.play().catch(()=>{/* 사용자가 수동 재생 가능 */});
+    }
+
+    function submit(){
+      const val = input.value;
+      if (isCorrect(val)){
+        err.textContent = "";
+        goPage2();
+      } else {
+        err.textContent = "정답이 아닙니다. 다시 입력해 주세요.";
+      }
+    }
+
+    btn.addEventListener('click', submit);
+    input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submit(); });
+    // 접근성: 진입 시 포커스
+    window.addEventListener('load', ()=> input.focus());
+  </script>
+</body>
+</html>
