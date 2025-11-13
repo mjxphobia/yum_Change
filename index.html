@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YUM</title>
+  <style>
+    :root{
+      --bg:#000; --fg:#f5f5f5; --line:#222;
+      --btnbg:#111; --btnfg:#fff; --btnbd:#444; --focus:#38bdf8;
+      --max: 900px; /* 데스크톱 최대 콘텐츠 폭 */
+    }
+
+    /* 전체 레이아웃 */
+    html,body{
+      margin:0; padding:0; min-height:100%;
+      background:var(--bg); color:var(--fg);
+      font-family:system-ui,"Noto Sans KR",sans-serif;
+    }
+    /* 화면 중앙 정렬 컨테이너 */
+    .container{
+      min-height:100svh;
+      display:flex; align-items:center; justify-content:center;
+      padding:24px 16px;
+    }
+    .stack{
+      width:min(var(--max), 100%);
+      margin:0 auto;
+      display:flex; flex-direction:column; align-items:center; gap:18px;
+    }
+
+    /* 미디어 */
+    .media{
+      width:clamp(260px, 80vw, 500px);
+      border-radius:12px; display:block; margin:0 auto;
+      box-shadow:0 8px 24px rgba(0,0,0,.35);
+      background:#000;
+    }
+    img.media{ height:auto; }
+    video.media{ height:auto; max-height:80svh; }
+
+    /* 입력 줄 */
+    .input-row{
+      width:clamp(260px, 80vw, 400px);
+      margin:0 auto;                    /* ✅ 확실한 가운데 정렬 */
+      display:flex; align-items:center; gap:10px;
+    }
+    input[type="text"]{
+      flex:1;
+      padding:12px 14px; font-size:16px; color:#fff;
+      background:#0b0b0b; border:1px solid var(--btnbd); border-radius:10px;
+      outline:none;
+    }
+    input::placeholder{ color:#777; }
+    input:focus{
+      border-color:var(--focus);
+      box-shadow:0 0 0 3px rgba(56,189,248,.25);
+    }
+    .btn{
+      padding:12px 18px; font-size:16px; font-weight:800;
+      color:var(--btnfg); background:var(--btnbg);
+      border:1px solid var(--btnbd); border-radius:10px; cursor:pointer;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .error{ min-height:1.2em; color:#ff6b6b; font-weight:700; text-align:center; }
+
+    /* 반응형 미세 조정 */
+    @media (max-width:480px){
+      .btn{ padding:10px 14px; font-size:14px; }
+      input[type="text"]{ font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main id="app" class="stack">
+      <!-- 페이지 1 -->
+      <img class="media" src="static/yum.png" alt="yum 이미지">
+      <div class="input-row">
+        <input id="answer" type="text" placeholder="무엇을 말할까.." autocomplete="off" />
+        <button class="btn" id="submitBtn" type="button">입력</button>
+      </div>
+      <div class="error" id="err"></div>
+    </main>
+  </div>
+
+  <script>
+    const app   = document.getElementById('app');
+    const input = document.getElementById('answer');
+    const btn   = document.getElementById('submitBtn');
+    const err   = document.getElementById('err');
+
+    const normalize = s => (s||"").trim().replace(/\s+/g, " ");
+    const isCorrect = s => normalize(s) === "혹시 쥐?";
+
+    function goPage2(){
+      app.innerHTML = `
+        <video class="media" id="vid" playsinline muted autoplay controls>
+          <source src="static/yumchange.mp4" type="video/mp4">
+          동영상을 재생할 수 없습니다.
+        </video>
+      `;
+      const v = document.getElementById('vid');
+      v.muted = true;
+      v.play().catch(()=>{ /* 자동재생이 막히면 사용자가 play 가능 */ });
+    }
+
+    function submit(){
+      if (isCorrect(input.value)){
+        err.textContent = "";
+        goPage2();
+      } else {
+        err.textContent = "할 말이 없으면 가서 일하거라.";
+      }
+    }
+
+    btn.addEventListener('click', submit);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    window.addEventListener('load', () => input.focus());
+  </script>
+</body>
+</html>
